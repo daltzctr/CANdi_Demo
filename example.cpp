@@ -146,7 +146,7 @@ int main() {
 				break;
 			case LEDState::ShowScore:
 				auto position = units::math::fmod(magEncoderPosition.GetValue(), 1_tr);
-				if (position < 0) {
+				if (position < 0_tr) {
 					position += 1_tr;
 				}
 
