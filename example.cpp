@@ -131,7 +131,7 @@ int main() {
 				timer = 0;
 				break;
 			case LEDState::Stopping:
-				if (timer > loopFrequencyHz * 10) {
+				if (timer > loopFrequencyHz * 2) {
 					/* Reset timer */
 					timer = 0;
 
