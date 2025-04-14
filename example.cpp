@@ -24,6 +24,7 @@
 #include "units/time.h"
 #include "ctre/phoenix6/unmanaged/Unmanaged.hpp"
 #include "ctre/phoenix/led/CANdle.h"
+#include "units/math.h"
 #include "ctre/phoenix/led/ColorFlowAnimation.h"
 std::string interface = "can0";
 
@@ -131,7 +132,7 @@ int main() {
 				timer = 0;
 				break;
 			case LEDState::Stopping:
-				if (timer > loopFrequencyHz * 2) {
+				if (timer >= loopFrequencyHz * 2) {
 					/* Reset timer */
 					timer = 0;
 
@@ -144,27 +145,31 @@ int main() {
 				timer++;
 				break;
 			case LEDState::ShowScore:
-				double positionDegrees = fmod(magEncoderPosition.GetValueAsDouble(), 1) * 360;
+				auto position = units::math::fmod(magEncoderPosition.GetValue(), 1_tr);
+				if (position < 0) {
+					position += 1_tr;
+				}
+
 				int score = 0;
-				if (positionDegrees < 45) {
+				if (position < 45_deg) {
 					score = 4;
-				} else if (positionDegrees < 90) {
+				} else if (position < 90_deg) {
 					score = 3;
-				} else if (positionDegrees < 170) {
+				} else if (position < 170_deg) {
 					score = 2;
-				} else if (positionDegrees < 180) {
+				} else if (position < 180_deg) {
 					score = 8;
-				} else if (positionDegrees < 225) {
+				} else if (position < 225_deg) {
 					score = 6;
-				} else if (positionDegrees < 270) {
+				} else if (position < 270_deg) {
 					score = 6;
-				} else if (positionDegrees < 330) {
+				} else if (position < 330_deg) {
 					score = 2;
 				} else {
 					score = 7;
 				}
 
-				m_candle.SetLEDs(0, 255, 0, 0, 0, score);
+				m_candle.SetLEDs(0, 50, 0, 0, 0, score);
 				break;
 		}
 
@@ -184,7 +189,7 @@ int main() {
 
 		/* Timeout if we haven't received a control signal in 20ms */
 		/* Feed enable is required for actuators/motors to enable */
-		ctre::phoenix::unmanaged::FeedEnable(20);
+		ctre::phoenix::unmanaged::FeedEnable(50);
 
 		/* 5ms control loop */
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000/loopFrequencyHz));

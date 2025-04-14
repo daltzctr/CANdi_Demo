@@ -1,7 +1,7 @@
 {
     "cmake.sourceDirectory": "/wsl.localhost/Ubuntu/home/ctre/phoenix5-linux-example",
     "cmake.ignoreCMakeListsMissing": true,
-    "C_Cpp.errorSquiggles": "disabled",
+    "C_Cpp.errorSquiggles": "enabled",
     "files.associations": {
         "array": "cpp",
         "atomic": "cpp",
