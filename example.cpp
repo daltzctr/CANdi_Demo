@@ -39,7 +39,12 @@ int main() {
 	ctre::phoenix6::hardware::TalonFX m_motor{0, interface};
 	ctre::phoenix6::hardware::CANdi m_candi{0, interface};
 	ctre::phoenix6::configs::TalonFXConfiguration m_motorConfigs{};
+	ctre::phoenix6::configs::CANdiConfiguration m_candiConfigs{};
+	
 	ctre::phoenix::led::CANdle m_candle{0, interface};
+
+	/* TODO, update this so 0 o-clock is 0 degrees */
+	m_candiConfigs.PWM1.AbsoluteSensorOffset = 0.0_tr;
 
 	m_motorConfigs.CurrentLimits.StatorCurrentLimit = 10_A;
 	m_motorConfigs.CurrentLimits.StatorCurrentLimitEnable = true;
@@ -55,10 +60,20 @@ int main() {
 	m_motorConfigs.Slot0.kA = 0;
 	m_motorConfigs.Slot0.kG = 0;
 
-	auto& configurator = m_motor.GetConfigurator();
+	auto& motorConfigurator = m_motor.GetConfigurator();
+	auto& candiConfigurator = m_candi.GetConfigurator();
 
 	for (int i = 0; i <= 5; ++i) {
-		auto configErr = configurator.Apply(m_motorConfigs);
+		auto configErr = motorConfigurator.Apply(m_motorConfigs);
+
+		/* Break early because configs succeeded */
+		if (configErr.IsOK()) {
+			break;
+		}
+	}
+
+	for (int i = 0; i <= 5; ++i) {
+		auto configErr = candiConfigurator.Apply(m_candiConfigs);
 
 		/* Break early because configs succeeded */
 		if (configErr.IsOK()) {
