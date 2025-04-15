@@ -106,6 +106,8 @@ int main() {
 	/* How fast the main loop should run at */
 	int loopFrequencyHz = 250;
 
+	int timeSinceLastButtonTransition = 999;
+
 	while (true) {
 		ctre::phoenix6::BaseStatusSignal::WaitForAll(
 			10_ms,
@@ -113,13 +115,22 @@ int main() {
 			buttonClosedState
 		);
 
-		/* Button is pressed and we are currently accelerating */
-		if (buttonClosedState.GetValue() == true && shouldAccelerate) {
-			shouldAccelerate = false; /* stop the mechanism */
-			ledState = LEDState::Stopping;
-		} else if (buttonClosedState.GetValue() == false && !shouldAccelerate) {
-			shouldAccelerate = true; /* start the mechanism and reset LEDs*/
-			ledState = LEDState::Accelerating;
+		/* Debounce button transitions by half a second */
+		if (timeSinceLastButtonTransition >= loopFrequencyHz * 0.5) {
+			/* Button is pressed and we are currently accelerating */
+			if (buttonClosedState.GetValue() == true && shouldAccelerate) {
+				shouldAccelerate = false; /* stop the mechanism */
+				ledState = LEDState::Stopping;
+			} else if (buttonClosedState.GetValue() == false && !shouldAccelerate) {
+				shouldAccelerate = true; /* start the mechanism and reset LEDs*/
+				ledState = LEDState::Accelerating;
+			}
+
+			/* Reset time since transition */
+			timeSinceLastButtonTransition = 0;
+		} else {
+			/* Increment time */
+			timeSinceLastButtonTransition += 1;
 		}
 
 		/* Small state machine to handle showing score and LED animations */
